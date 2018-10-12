@@ -1,5 +1,6 @@
 import os
 import sys
+import traceback
 
 from configparser import ConfigParser, MissingSectionHeaderError
 from diary import Diary
@@ -50,9 +51,7 @@ except ValueError:
 def diary(command, day, peer_id):
     data = d.method('diary', from_date=day, to_date=day)
 
-    if 'error' in data:
-        return vk.method('messages.send', {'peer_id': peer_id, 'message': 'Ошибка'})
-    if data['success'] is False:
+    if 'error' in data or not data['success']:
         return vk.method('messages.send', {'peer_id': peer_id, 'message': 'Ошибка'})
 
     data = data['days'][0][1]
@@ -84,6 +83,13 @@ def diary(command, day, peer_id):
                 ', '.join(m[2][0] for m in lesson['marks']) if lesson['marks'] != [] else '—'
             ))
 
+        elif command == 'attendance':
+            strs.append('{}. {}: {}'.format(
+                x,
+                lesson['discipline'],
+                lesson['attendance'][1]
+            ))
+
     return vk.method('messages.send', {'peer_id': peer_id, 'message': '\n'.join(strs)})
 
 
@@ -98,6 +104,7 @@ def progress(args, peer_id):
 
     if 'error' in data or not data['success']:
         return vk.method('messages.send', {'peer_id': peer_id, 'message': 'Ошибка'})
+
     if 'kind' in data:
         if data['kind'] == 'Каникулы':
             return vk.method('messages.send', {'peer_id': peer_id, 'message': 'Каникулы'})
@@ -110,6 +117,8 @@ def progress(args, peer_id):
         data = data['classyear']
     elif level == 'параллель':
         data = data['level']
+    else:
+        vk.method('messages.send', {'peer_id': event.peer_id, 'message': 'Некорректная команда'})
 
     strs = []
     strs.append(f'Все предметы: {data["total"]}')
@@ -120,6 +129,32 @@ def progress(args, peer_id):
         strs.append(f'{x}. {lesson}: {data[lesson]}')
 
     return vk.method('messages.send', {'peer_id': peer_id, 'message': '\n'.join(strs)})
+
+
+def totals(day, peer_id):
+    data = d.method('totals', date=day)
+
+    if 'error' in data or not data['success']:
+        return vk.method('messages.send', {'peer_id': peer_id, 'message': 'Ошибка'})
+
+    if 'kind' in data:
+        if data['kind'] == 'Не выставлено ни одной итоговой оценки!':
+            return vk.method('messages.send', {'peer_id': peer_id, 'message': 'Не выставлено ни одной итоговой оценки'})
+        else:
+            return vk.method('messages.send', {'peer_id': peer_id, 'message': 'Ошибка'})
+
+    strs = []
+    for x, period in enumerate(data['period_types']):
+        strs.append(f'{period}:')
+        for y, subject in enumerate(data['subjects'], start=1):
+            strs.append('{}. {}: {}'.format(
+                y,
+                subject,
+                data['subjects'][subject][x]
+            ))
+
+        vk.method('messages.send', {'peer_id': peer_id, 'message': '\n'.join(strs)})
+        strs = []
 
 
 def ping(peer_id):
@@ -138,8 +173,12 @@ while True:
                     diary('dz', text[4:], event.peer_id)
                 elif text.startswith('/marks '):
                     diary('marks', text[7:], event.peer_id)
+                elif text.startswith('/attendance '):
+                    diary('attendance', text[12:], event.peer_id)
                 elif text.startswith('/average '):
                     progress(text[9:], event.peer_id)
+                elif text.startswith('/totals '):
+                    totals(text[8:], event.peer_id)
                 elif text == '/ping':
                     ping(event.peer_id)
                 else:
@@ -148,4 +187,6 @@ while True:
         os.system('pause')
         break
     except Exception:
-        pass
+        traceback.print_exc()
+        os.system('pause')
+        break
