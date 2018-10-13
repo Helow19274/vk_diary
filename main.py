@@ -150,7 +150,7 @@ def totals(day, peer_id):
             strs.append('{}. {}: {}'.format(
                 y,
                 subject,
-                data['subjects'][subject][x]
+                data['subjects'][subject][x] if data['subjects'][subject][x] != '0' else '-'
             ))
 
         vk.method('messages.send', {'peer_id': peer_id, 'message': '\n'.join(strs)})
