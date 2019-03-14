@@ -7,7 +7,7 @@ from diary import Diary
 from vk import VkApi, VkBotLongPoll
 from pytz import timezone
 from datetime import datetime, timedelta
-from configparser import ConfigParser, MissingSectionHeaderError
+from configparser import ConfigParser, MissingSectionHeaderError, ParsingError
 
 
 def check_date(day):
@@ -157,9 +157,9 @@ def call_exit(text=None, status=1):
 parser = ConfigParser()
 try:
     file = parser.read('settings.ini', encoding='utf-8')
-    if len(file) == 0:
+    if not file:
         call_exit('Не найден файл settings.ini')
-except MissingSectionHeaderError:
+except (MissingSectionHeaderError, ParsingError):
     call_exit('Неверный формат файла settings.ini')
 
 if not parser['Vk']['vk_token'] or not parser['Vk']['group_id'] or not parser['Diary']['diary_login'] or not parser['Diary']['diary_password']:
@@ -183,7 +183,7 @@ except Exception:
 try:
     vk.method('groups.getOnlineStatus', {'group_id': parser['Vk']['group_id']})
 except Exception:
-    call_exit('В настройках группы отключены сообщения')
+    call_exit('В настройках группы отключены сообщения или неверный id группы')
 
 d = Diary(parser['Diary']['diary_login'], parser['Diary']['diary_password'], session)
 try:
