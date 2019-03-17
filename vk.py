@@ -28,10 +28,6 @@ class VkBotLongPoll(object):
         self.vk = vk
         self.group_id = group_id
 
-        self.key = None
-        self.server = None
-        self.ts = None
-
         self.update_longpoll_server()
 
     def update_longpoll_server(self, update_ts=True):

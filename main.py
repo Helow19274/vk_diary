@@ -4,9 +4,9 @@ import traceback
 import subprocess
 
 from diary import Diary
-from vk import VkApi, VkBotLongPoll
 from pytz import timezone
 from datetime import datetime, timedelta
+from vk import VkApi, VkBotLongPoll, ApiError
 from configparser import ConfigParser, MissingSectionHeaderError, ParsingError
 
 
@@ -177,7 +177,7 @@ try:
     perms = [perm['name'] for perm in vk.method('groups.getTokenPermissions')['permissions']]
     if 'manage' not in perms or 'messages' not in perms:
         call_exit('У ключа недостаточно прав')
-except Exception:
+except ApiError:
     call_exit('Неверный ключ доступа')
 
 try:
@@ -199,7 +199,10 @@ payload = {
     'api_version': '5.92',
     'message_new': 1
 }
-vk.method('groups.setLongPollSettings', payload)
+try:
+    vk.method('groups.setLongPollSettings', payload)
+except ApiError:
+    call_exit('Неверный id группы')
 
 lp = VkBotLongPoll(vk, group_id=parser['Vk']['group_id'])
 print('Launching!')
