@@ -10,12 +10,3 @@
 4. Заполнить settings.ini
 
 5. Запустить: ```$ python main.py```
-
-#### Или
-1. Скачать [архив](https://github.com/Helow19274/vk_diary/releases/latest)
-
-2. Распаковать архив
-
-3. Заполнить settings.ini
-
-4. Запустить main.exe
