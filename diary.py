@@ -5,7 +5,7 @@ class Diary(object):
         self.session = session
         self.login = login
         self.password = password
-        self.base = 'http://e-school.ryazangov.ru/rest/{}'
+        self.base = 'https://e-school.ryazangov.ru/rest/{}'
         self.pupil_id = None
 
     def __del__(self):
