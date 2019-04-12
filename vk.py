@@ -27,6 +27,9 @@ class VkBotLongPoll(object):
     def __init__(self, vk, group_id):
         self.vk = vk
         self.group_id = group_id
+        self.key = None
+        self.server = None
+        self.ts = None
 
         self.update_longpoll_server()
 

@@ -51,11 +51,7 @@ def diary(command, day):
             strs.append(f'{x}. {lesson["discipline"]}')
 
         elif command == 'dz':
-            strs.append('{}. {}: {}'.format(
-                x,
-                lesson['discipline'],
-                lesson['homework'] if lesson['homework'] != '' else '—'
-            ))
+            strs.append(f'{x}. {lesson["discipline"]}: {lesson["homework"] if lesson["homework"] != "" else "—"}')
 
         elif command == 'marks':
             strs.append('{}. {}: {}'.format(
@@ -65,11 +61,7 @@ def diary(command, day):
             ))
 
         elif command == 'attendance':
-            strs.append('{}. {}: {}'.format(
-                x,
-                lesson['discipline'],
-                lesson['attendance'][1]
-            ))
+            strs.append(f'{x}. {lesson["discipline"]}: {lesson["attendance"][0]}')
 
     return'\n'.join(strs)
 
@@ -205,7 +197,7 @@ except ApiError:
     call_exit('Неверный id группы')
 
 lp = VkBotLongPoll(vk, group_id=parser['Vk']['group_id'])
-print('Launching!')
+print('Запущен!')
 while True:
     try:
         for event in lp.listen():
